@@ -1,0 +1,57 @@
+// bubble_sort_compare.cpp
+#include <iostream>
+#include <vector>
+#include <chrono>
+#include <omp.h>
+#include <cstdlib>
+
+using namespace std;
+using namespace chrono;
+
+// Sequential Bubble Sort
+void sequentialBubbleSort(vector<int>& arr) {
+    int n = arr.size();
+    for (int i = 0; i < n - 1; ++i)
+        for (int j = 0; j < n - i - 1; ++j)
+            if (arr[j] > arr[j + 1])
+                swap(arr[j], arr[j + 1]);
+}
+
+// Parallel Bubble Sort using OpenMP
+void parallelBubbleSort(vector<int>& arr) {
+    int n = arr.size();
+    for (int i = 0; i < n; ++i) {
+        #pragma omp parallel for
+        for (int j = i % 2; j < n - 1; j += 2) {
+            if (arr[j] > arr[j + 1])
+                swap(arr[j], arr[j + 1]);
+        }
+    }
+}
+
+int main() {
+    const int SIZE = 5000;
+    vector<int> original(SIZE);
+
+    srand(time(0));
+    for (int i = 0; i < SIZE; ++i)
+        original[i] = rand() % 10000;
+
+    // Sequential Bubble Sort
+    vector<int> seqArr = original;
+    auto start = high_resolution_clock::now();
+    sequentialBubbleSort(seqArr);
+    auto end = high_resolution_clock::now();
+    cout << "Sequential Bubble Sort Time: "
+         << duration_cast<milliseconds>(end - start).count() << " ms\n";
+
+    // Parallel Bubble Sort
+    vector<int> parArr = original;
+    start = high_resolution_clock::now();
+    parallelBubbleSort(parArr);
+    end = high_resolution_clock::now();
+    cout << "Parallel Bubble Sort Time: "
+         << duration_cast<milliseconds>(end - start).count() << " ms\n";
+
+    return 0;
+}
