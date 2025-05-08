@@ -1,0 +1,84 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <omp.h>
+
+void parallel_sum_avg(int* data, int size, int* sum_val_ptr, double* avg_val_ptr) {
+    int local_sum = 0;
+
+    #pragma omp parallel for reduction(+:local_sum)
+    for (int i = 0; i < size; i++) {
+        local_sum += data[i];
+    }
+
+    *sum_val_ptr = local_sum;
+    *avg_val_ptr = (double)local_sum / size;
+}
+
+int main() {
+    int data[] = {5, 2, 9, 1, 7, 6, 8, 3, 4};
+    int size = sizeof(data) / sizeof(data[0]);
+
+    int sum_val;
+    double avg_val;
+    parallel_sum_avg(data, size, &sum_val, &avg_val);
+
+    printf("Sum: %d\n", sum_val);
+    printf("Average: %.2lf\n", avg_val);
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+//with user ip
+#include <stdio.h>
+#include <stdlib.h>
+#include <omp.h>
+
+void parallel_sum_avg(int* data, int size, int* sum_val_ptr, double* avg_val_ptr) {
+    int local_sum = 0;
+
+    #pragma omp parallel for reduction(+:local_sum)
+    for (int i = 0; i < size; i++) {
+        local_sum += data[i];
+    }
+
+    *sum_val_ptr = local_sum;
+    *avg_val_ptr = (double)local_sum / size;
+}
+
+int main() {
+    int size;
+    printf("Enter number of elements: ");
+    scanf("%d", &size);
+
+    int* data = (int*)malloc(size * sizeof(int));
+    if (data == NULL) {
+        printf("Memory allocation failed.\n");
+        return 1;
+    }
+
+    printf("Enter %d elements:\n", size);
+    for (int i = 0; i < size; i++) {
+        scanf("%d", &data[i]);
+    }
+
+    int sum_val;
+    double avg_val;
+    parallel_sum_avg(data, size, &sum_val, &avg_val);
+
+    printf("Sum: %d\n", sum_val);
+    printf("Average: %.2lf\n", avg_val);
+
+    free(data);
+    return 0;
+}

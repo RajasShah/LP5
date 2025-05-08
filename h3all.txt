@@ -1,0 +1,53 @@
+#include <stdio.h> 
+#include <stdlib.h> 
+#include <omp.h> 
+
+void parallel_reduction_min_max_sum_avg(int* data, int size, int* min_val_ptr, int* max_val_ptr, int* sum_val_ptr, double* avg_val_ptr) {
+    int local_min = data[0];
+    int local_max = data[0];
+    int local_sum = 0;
+
+    #pragma omp parallel for reduction(min:local_min) reduction(max:local_max) reduction(+:local_sum)
+    for (int i = 0; i < size; i++) {
+        if (data[i] < local_min)
+            local_min = data[i];
+        if (data[i] > local_max)
+            local_max = data[i];
+        local_sum += data[i];
+    }
+
+    *min_val_ptr = local_min;
+    *max_val_ptr = local_max;
+    *sum_val_ptr = local_sum;
+    *avg_val_ptr = (double)local_sum / size;
+}
+
+int main() {
+    int data_size;
+    printf("Enter number of elements: ");
+    scanf("%d", &data_size);
+
+    int* data = (int*)malloc(data_size * sizeof(int));
+    if (data == NULL) {
+        printf("Memory allocation failed.\n");
+        return 1;
+    }
+
+    printf("Enter %d elements:\n", data_size);
+    for (int i = 0; i < data_size; i++) {
+        scanf("%d", &data[i]);
+    }
+
+    int min_val, max_val, sum_val;
+    double avg_val;
+
+    parallel_reduction_min_max_sum_avg(data, data_size, &min_val, &max_val, &sum_val, &avg_val);
+
+    printf("\nMinimum value: %d\n", min_val);
+    printf("Maximum value: %d\n", max_val);
+    printf("Sum value: %d\n", sum_val);
+    printf("Average value: %.2lf\n", avg_val);
+
+    free(data);
+    return 0;
+}
